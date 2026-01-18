@@ -89,6 +89,11 @@
         border: 1px solid var(--border);
         margin-bottom: 8px;
         font-size: 0.85rem;
+        cursor: pointer;
+      }
+
+      .feature:hover {
+        border-color: var(--green);
       }
 
       .content {
@@ -146,21 +151,23 @@
         cursor: pointer;
       }
 
-      .plot-container {
-        margin-top: 24px;
-        border: 2px dashed var(--border);
+      .panel {
+        margin-top: 16px;
+        background: var(--panel);
+        border: 1px solid var(--border);
         border-radius: 12px;
         padding: 16px;
-        min-height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         color: var(--grey);
       }
 
-      .plot-container img {
+      .panel strong {
+        color: var(--text);
+      }
+
+      .panel img {
         max-width: 100%;
         border-radius: 8px;
+        margin-top: 8px;
       }
     </style>
   </head>
@@ -185,6 +192,10 @@
       <section class="content">
         <div class="stats" id="stats"></div>
 
+        <div class="panel" id="featureStats">
+          Select a feature to view mean and variance
+        </div>
+
         <div class="plot-controls">
           <select id="xSelect">
             <option value="">X variable</option>
@@ -197,7 +208,7 @@
           <button onclick="generatePlot()">Generate Plot</button>
         </div>
 
-        <div class="plot-container" id="plotContainer">
+        <div class="panel" id="plotContainer">
           Select two numeric variables to generate a plot
         </div>
       </section>
@@ -263,6 +274,7 @@
           const div = document.createElement("div");
           div.className = "feature";
           div.textContent = col;
+          div.onclick = () => showFeatureStats(col);
           featureList.appendChild(div);
         });
 
@@ -287,6 +299,32 @@
           optY.textContent = col;
           y.appendChild(optY);
         });
+      }
+
+      function showFeatureStats(column) {
+        const box = document.getElementById("featureStats");
+
+        const mean = summary.mean[column];
+        const variance = summary.variance[column];
+
+        if (mean === undefined) {
+          box.innerHTML = `
+            <strong>${column}</strong><br /><br />
+            Non-numeric feature.<br />
+            Mean and variance unavailable.
+          `;
+          return;
+        }
+
+        box.innerHTML = `
+          <strong>${column}</strong><br /><br />
+          Mean: <span style="color:#ffdd33">${mean.toFixed(
+            4
+          )}</span><br />
+          Variance: <span style="color:#73c936">${variance.toFixed(
+            4
+          )}</span>
+        `;
       }
 
       async function generatePlot() {
